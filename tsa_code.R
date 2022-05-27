@@ -56,11 +56,22 @@ dfs.HWadd.forecast <- predict(dfs.HWadd,
                                   n.ahead = 36,
                                   prediction.interval = TRUE) #fit = prognoza, dalej dolny i gorny przedzial ufnosci
 
+library(rcompanion)
+par(mfrow=c(1,2))
+
 plot(dfs) # porownanie prognozy z oryginalnym szeregiem 
 lines(dfs.HWadd.forecast[, 1], col = "blue") # prognoza
 lines(dfs.HWadd.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
 lines(dfs.HWadd.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
 abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+title("Model addytywny")
+
+plot(window(dfs, start = c(2018, 12)))  # porownanie prognozy z oryginalnym szeregiem 
+lines(dfs.HWadd.forecast[, 1], col = "blue") # prognoza
+lines(dfs.HWadd.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
+lines(dfs.HWadd.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
+abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+title("Model addytywny")
 
 
 # multiplikatywny model Holta-Wintersa
@@ -69,6 +80,26 @@ dfs.HWmult <- HoltWinters(dfs.in,
 dfs.HWmult # info o modelu; beta bliska zero wiec nie ma duzego lokalnego trendu zmienijacego sie w czasie
 
 plot(dfs.HWmult)
+
+dfs.HWmult.forecast <- predict(dfs.HWmult,
+                              n.ahead = 36,
+                              prediction.interval = TRUE) #fit = prognoza, dalej dolny i gorny przedzial ufnosci
+
+plot(dfs) # porownanie prognozy z oryginalnym szeregiem 
+lines(dfs.HWmult.forecast[, 1], col = "blue") # prognoza
+lines(dfs.HWmult.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
+lines(dfs.HWmult.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
+abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+title("Model multiplikatywny")
+
+plot(window(dfs, start = c(2018, 12)))  # porownanie prognozy z oryginalnym szeregiem 
+lines(dfs.HWmult.forecast[, 1], col = "blue") # prognoza
+lines(dfs.HWmult.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
+lines(dfs.HWmult.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
+abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+title("Model multiplikatywny")
+
+
 
 # oszacujmy prognozę na 36 obserwacji naprzód
 dfs.HWmult.forecast <- predict(dfs.HWmult,
@@ -98,7 +129,6 @@ dfs.HWadd$fitted[, 1]
 dfs.HWmult$fitted[, 1]
 
 dfs.HWadd.summary <- window(dfs.HWadd$fitted[, 1], end =c(2021, 12) , extend = TRUE)
-
 dfs.HWmult.summary <- window(dfs.HWmult$fitted[, 1], end =c(2021, 12) , extend = TRUE)
 
 # wstawiamy prognozy 
