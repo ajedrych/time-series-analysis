@@ -79,14 +79,14 @@ summary(diff.df.kpss.test)
 # statystyka testowa = 0.1635 < 0,463 => brak podstaw do odrzucenia h0 o stacjonarnosci diff.ln.df
 
 par(mfrow = c(1, 2))
-acf(na.omit(diff.ln.df), lag.max = 24,
-    ylim = c(-1, 1),
-    xlim = c(1,3),
-    lwd = 4, col = "red", title="ACF")
-pacf(na.omit(diff.ln.df), lag.max = 24,
+acf(na.omit(diff.ln.df), lag.max = 36,
     ylim = c(-0.2, 0.2),
-    xlim = c(1,3),
-    lwd = 4, col = "red", title="PACF")
+    xlim = c(1,4),
+    lwd = 4, col = "red")
+pacf(na.omit(diff.ln.df), lag.max = 36,
+    ylim = c(-0.2, 0.2),
+    xlim = c(1,4),
+    lwd = 4, col = "red")
 
 #arima(0,1,0)
 ################################################################################
