@@ -23,6 +23,28 @@ Box.test(df, lag=24, type="Ljung-Box") #odrzucamy H0: df to biały szum, bo p-va
 # test Box-Pierce
 Box.test(df, lag=24, type="Box-Pierce") #odrzucamy H0: df to biały szum, bo p-value <0.05
 
+# wykres
+plot(df,
+     type = "l",
+     col  = "blue",
+     lwd  = 2,
+     main = "Realny kurs walutowy dla Polski")
+
+# pierwsze różnice
+library(xts)
+
+diff.df<-diff.xts(df)
+
+# test dickeya-fullera
+library(urca)
+df.test <- ur.df(df, type = c("trend"), lags = 0) 
+summary(df.test)
+
+library(lmtest)
+df.test.resids <- df.test@testreg$residuals #reszty
+bg.df <- bgtest(df.test.resids ~ 1, order = 1) #autokorelacja 1 rzędu
+bg.df
+
 ################################################################################
 ##################### dane sezonowe ############################################
 
