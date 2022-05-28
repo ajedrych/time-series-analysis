@@ -57,7 +57,7 @@ install.packages("fUnitRoots")
 library(fUnitRoots)
 source("funs/TESTDF.R") 
 
-testdf(variable = ln.df, ADF_type="nc", ADF_max_order = 5,BG_max_order = 6)
+testdf(variable = ln.df, ADF_type="nc", ADF_max_order = 5,BG_max_order = 13)
 
 # dla testow Breuscha-Godfreya p-value <0.05 => odrzucamy H0 o braku autokorelacji (augmentations = 0)
 # przechodzimy do testu ADF z jednym rozszerzeniem (augmentations = 1): sla testów BG p-value >0,05 => brak podstaw do odrzucenia
@@ -65,7 +65,7 @@ testdf(variable = ln.df, ADF_type="nc", ADF_max_order = 5,BG_max_order = 6)
 # patrzymy na p-value dla ADF = 0.84 => brak podstaw do odrzucenia H0 o tym, że ln.df jest zmienną niestacjonarną
 # przeprowadzamy test dla pierwszych różnic
 
-testdf(variable = diff.ln.df, ADF_type="nc", ADF_max_order = 5,BG_max_order = 6)
+testdf(variable = diff.ln.df, ADF_type="nc", ADF_max_order = 5,BG_max_order = 13)
 # dla testów B-G p-value >0,05 => brak podstaw do odrzucenia H0 o braku autokorelacji (augmentations=0)
 # patrzymy na p-valu D-F = 0,01 <0.05 => odrzucamy h0 o tym, że diff.ln.df jest zmienna niestacjonarna
 
