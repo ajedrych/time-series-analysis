@@ -7,7 +7,7 @@ library(rcompanion)
 par(mfrow=c(1,1))
 
 ################################################################################
-##################### dane niesezonowe #########################################
+##################### DANE NIESEZOWNOWE - REALNY KURS WALUTOWY POLSKI ##########
 df <- read_excel("niesez.xls")
 
 class(df)
