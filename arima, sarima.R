@@ -58,7 +58,6 @@ library(fUnitRoots)
 source("funs/TESTDF.R") 
 
 testdf(variable = ln.df, ADF_type="nc", ADF_max_order = 5,BG_max_order = 13)
-
 # dla testow Breuscha-Godfreya p-value <0.05 => odrzucamy H0 o braku autokorelacji (augmentations = 0)
 # przechodzimy do testu ADF z jednym rozszerzeniem (augmentations = 1): sla testów BG p-value >0,05 => brak podstaw do odrzucenia
 # H0 o braku autokorelacji
@@ -79,6 +78,17 @@ diff.df.kpss.test <- ur.kpss(diff.ln.df, type = c("mu"))  # stała w równaniu t
 summary(diff.df.kpss.test)
 # statystyka testowa = 0.1635 < 0,463 => brak podstaw do odrzucenia h0 o stacjonarnosci diff.ln.df
 
+par(mfrow = c(1, 2))
+acf(na.omit(diff.ln.df), lag.max = 24,
+    ylim = c(-1, 1),
+    xlim = c(1,3),
+    lwd = 4, col = "red", title="ACF")
+pacf(na.omit(diff.ln.df), lag.max = 24,
+    ylim = c(-0.2, 0.2),
+    xlim = c(1,3),
+    lwd = 4, col = "red", title="PACF")
+
+#arima(0,1,0)
 ################################################################################
 ##################### dane sezonowe ############################################
 
