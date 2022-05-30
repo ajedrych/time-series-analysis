@@ -7,7 +7,10 @@ library(rcompanion)
 par(mfrow=c(1,1))
 
 ################################################################################
-##################### DANE NIESEZOWNOWE - REALNY KURS WALUTOWY POLSKI ##########
+############ DANE NIESEZONOWE - REALNY KURS WALUTOWY POLSKI ####################
+################################################################################
+
+# 1. Wczytanie danych
 df <- read_excel("niesez.xls")
 
 class(df)
@@ -22,14 +25,14 @@ class(df)
 # Wykres danych w czasie
 plot(df, main = "Realny kurs walutowy Polski")
 
-# okresy in-sample i out-of-sample
+# próby in-sample i out-of-sample
 df.in <- 
   window(df,
-         end = c(2018, 12))
+         end = c(2020, 12))
 
 df.out <- 
   window(df,
-         start = c(2019, 01))
+         start = c(2021, 01))
 
 ##### modele ekstrapolacyjne ###################################################
 # prosty model wygładzania wykładniczego (EWMA) - bez trendu i sezonowości
@@ -41,8 +44,8 @@ df.EWMA <- HoltWinters(df.in,
 plot(df.EWMA)
 plot(df.EWMA$fitted)
 
-df.EWMA.forecast <- predict(df.EWMA, # prognoza na 36 obserwacji do przodu
-                               n.ahead = 36,
+df.EWMA.forecast <- predict(df.EWMA, # prognoza na 12 obserwacji do przodu
+                               n.ahead = 12,
                                prediction.interval = TRUE)
 
 library(rcompanion)
@@ -52,14 +55,14 @@ plot(df)
 lines(df.EWMA.forecast[, 1], col = "blue") # prognozy 
 lines(df.EWMA.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.EWMA.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2019, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("EWMA")
 
 plot(window(df, start = c(2018, 12)))
 lines(df.EWMA.forecast[, 1], col = "blue") # prognozy 
 lines(df.EWMA.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.EWMA.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2019, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("EWMA")
 
 # model Holta
@@ -69,22 +72,22 @@ df.Holt <- HoltWinters(df.in,
 plot(df.Holt)
 plot(df.Holt$fitted)
 
-df.Holt.forecast <- predict(df.Holt, # prognoza na 36 obserwacji do przodu
-                            n.ahead = 36,
+df.Holt.forecast <- predict(df.Holt, # prognoza na 12 obserwacji do przodu
+                            n.ahead = 12,
                             prediction.interval = TRUE)
 
 plot(df)
 lines(df.Holt.forecast[, 1], col = "blue") # prognozy 
 lines(df.Holt.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.Holt.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2019, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("Holt")
 
 plot(window(df, start = c(2018, 12)))
 lines(df.Holt.forecast[, 1], col = "blue") # prognozy 
 lines(df.Holt.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.Holt.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2019, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("Holt")
 
 # porównanie - bledy prognozy ex-post
@@ -95,8 +98,8 @@ df.Holt$fitted[, 1]
 df.EWMA.summary <- window(df.EWMA$fitted[, 1], end =c(2021, 12) , extend = TRUE)
 df.Holt.summary <- window(df.Holt$fitted[, 1], end =c(2021, 12) , extend = TRUE)
 
-window(df.EWMA.summary, start = c(2019, 1)) <- df.EWMA.forecast[, 1]
-window(df.Holt.summary, start = c(2019, 1)) <- df.Holt.forecast[, 1]
+window(df.EWMA.summary, start = c(2021, 1)) <- df.EWMA.forecast[, 1]
+window(df.Holt.summary, start = c(2021, 1)) <- df.Holt.forecast[, 1]
 
 df.EWMA.summary
 df.Holt.summary
@@ -107,7 +110,7 @@ library(xts)
 Holt.summary = as.xts(Holt.summary)
 
 sample_period <-
-  ts(ifelse(index(Holt.summary) < "2019-01", 0, 1), 
+  ts(ifelse(index(Holt.summary) < "2021-01", 0, 1), 
      start  =c(1994, 1), freq = 12)
 
 names(Holt.summary)
