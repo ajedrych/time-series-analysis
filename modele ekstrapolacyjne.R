@@ -130,6 +130,8 @@ aggregate(Holt.summary[, 4:12],
           by = list(Holt.summary$sample_period),
           FUN = function(x) mean(x, na.rm = T))
 
+par(mfrow=c(1,1))
+
 ################################################################################
 ##################### dane sezonowe ############################################
 
@@ -152,11 +154,11 @@ plot(dfs, main = "Liczba pasażerów samolotów w Polsce")
 # okresy in-sample i out-of-sample
 dfs.in <- 
   window(dfs,
-         end = c(2018, 12))
+         end = c(2020, 12))
 
 dfs.out <- 
   window(dfs,
-         start = c(2019, 01))
+         start = c(2021, 01))
 
 # addytywny model Holta-Wintersa
 dfs.HWadd <- HoltWinters(dfs.in,
