@@ -28,11 +28,11 @@ plot(df, main = "Realny kurs walutowy Polski")
 # próby in-sample i out-of-sample
 df.in <- 
   window(df,
-         end = c(2020, 12))
+         end = c(2021, 09))
 
 df.out <- 
   window(df,
-         start = c(2021, 01))
+         start = c(2021, 10))
 
 ##### modele ekstrapolacyjne ###################################################
 # prosty model wygładzania wykładniczego (EWMA) - bez trendu i sezonowości
