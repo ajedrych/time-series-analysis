@@ -44,8 +44,8 @@ df.EWMA <- HoltWinters(df.in,
 plot(df.EWMA)
 plot(df.EWMA$fitted)
 
-df.EWMA.forecast <- predict(df.EWMA, # prognoza na 12 obserwacji do przodu
-                               n.ahead = 12,
+df.EWMA.forecast <- predict(df.EWMA, # prognoza na 3 obserwacje do przodu
+                               n.ahead = 3,
                                prediction.interval = TRUE)
 
 library(rcompanion)
@@ -55,14 +55,14 @@ plot(df)
 lines(df.EWMA.forecast[, 1], col = "blue") # prognozy 
 lines(df.EWMA.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.EWMA.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("EWMA")
 
-plot(window(df, start = c(2018, 12)))
+plot(window(df, start = c(2019, 12)))
 lines(df.EWMA.forecast[, 1], col = "blue") # prognozy 
 lines(df.EWMA.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.EWMA.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("EWMA")
 
 # model Holta
@@ -72,22 +72,22 @@ df.Holt <- HoltWinters(df.in,
 plot(df.Holt)
 plot(df.Holt$fitted)
 
-df.Holt.forecast <- predict(df.Holt, # prognoza na 12 obserwacji do przodu
-                            n.ahead = 12,
+df.Holt.forecast <- predict(df.Holt, # prognoza na 3 obserwacje do przodu
+                            n.ahead = 3,
                             prediction.interval = TRUE)
 
 plot(df)
 lines(df.Holt.forecast[, 1], col = "blue") # prognozy 
 lines(df.Holt.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.Holt.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("Holt")
 
-plot(window(df, start = c(2018, 12)))
+plot(window(df, start = c(2019, 12)))
 lines(df.Holt.forecast[, 1], col = "blue") # prognozy 
 lines(df.Holt.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
 lines(df.Holt.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
-abline(v = 2021, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
 title("Holt")
 
 # porównanie - bledy prognozy ex-post
@@ -110,8 +110,10 @@ library(xts)
 Holt.summary = as.xts(Holt.summary)
 
 sample_period <-
-  ts(ifelse(index(Holt.summary) < "2021-01", 0, 1), 
+  ts(ifelse(index(Holt.summary) < "2021-10", 0, 1), 
      start  =c(1994, 1), freq = 12)
+
+sample_period
 
 names(Holt.summary)
 Holt.summary$sample_period <- sample_period
