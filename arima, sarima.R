@@ -22,7 +22,7 @@ df.in <-
   window(df,
          end = c(2021, 09))
 
-df.out <- 
+df.out <-       # trzy obserwacje out-of-sample, bo szereg niesezonowy
   window(df,
          start = c(2021, 10))
 
@@ -35,8 +35,6 @@ Box.test(df.in, lag=24, type="Box-Pierce") #odrzucamy H0: df to biały szum, bo 
 # wykres
 plot(df.in,
      type = "l",
-     col  = "blue",
-     lwd  = 2,
      main = "Realny kurs walutowy dla Polski")
 
 # pierwsze różnice
@@ -45,10 +43,8 @@ diff.df.in<-diff.xts(df.in)
 
 par(mfrow=c(1,2))
 
-plot(diff.df,
+plot(diff.df.in,
      type = "l",
-     col  = "blue",
-     lwd  = 2,
      main = "Pierwsze różnice")
 
 #logarytmowanie w celu wyeliminowania zmieniającej się wariancji
@@ -57,8 +53,6 @@ diff.ln.df.in<-diff.xts(ln.df.in)
 
 plot(diff.ln.df.in,
      type = "l",
-     col  = "blue",
-     lwd  = 2,
      main = "Pierwsze różnice dla logarytmu")
 
 # test dickeya-fullera, druga forma funkcyjna (drift)
@@ -95,21 +89,18 @@ Box.test(diff.ln.df.in, lag=24, type="Ljung-Box") #brak podstaw do odrzucenia H0
 # test Box-Pierce
 Box.test(diff.ln.df.in, lag=24, type="Box-Pierce") #brak podstaw do odrzucenia H0 o tym, że diff.ln.df.in to bialy szum, poniewaz p-value>0.05 
 
-
-library(forecast)
-tsdisplay(ln.df, lag.max=24)
-
 par(mfrow = c(1, 2))
-acf(na.omit(diff.ln.df), lag.max = 36,
+acf(na.omit(diff.ln.df.in), lag.max = 24,
     ylim = c(-0.2, 0.2),
     xlim = c(1,4),
     lwd = 4, col = "red")
-pacf(na.omit(diff.ln.df), lag.max = 36,
+pacf(na.omit(diff.ln.df.in), lag.max = 24,
     ylim = c(-0.2, 0.2),
     xlim = c(1,4),
     lwd = 4, col = "red")
 
-#arima(0,1,0)
+# analizowany szereg jest białym szumem (white noise) i nie można go prognozwać
+
 ################################################################################
 ##################### dane sezonowe ############################################
 

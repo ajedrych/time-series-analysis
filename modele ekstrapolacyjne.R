@@ -109,14 +109,14 @@ Holt.summary <- ts.union(df,df.EWMA.summary,df.Holt.summary)
 library(xts)
 Holt.summary = as.xts(Holt.summary)
 
-sample_period <-
+sample_period.Holt <-
   ts(ifelse(index(Holt.summary) < "2021-10", 0, 1), 
      start  =c(1994, 1), freq = 12)
 
-sample_period
+sample_period.Holt
 
 names(Holt.summary)
-Holt.summary$sample_period <- sample_period
+Holt.summary$sample_period.Holt <- sample_period.Holt
 
 Holt.summary$mae_EWMA <- abs(Holt.summary$df.EWMA.summary-Holt.summary$df)
 Holt.summary$mse_EWMA   <- (Holt.summary$df.EWMA.summary-Holt.summary$df)^2
@@ -129,7 +129,7 @@ Holt.summary$mape_Holt     <- abs((Holt.summary$df.Holt.summary-Holt.summary$df)
 Holt.summary$amape_Holt    <- abs((Holt.summary$df.Holt.summary-Holt.summary$df)/(Holt.summary$df.Holt.summary+Holt.summary$df))
 
 aggregate(Holt.summary[, 4:12],
-          by = list(Holt.summary$sample_period),
+          by = list(Holt.summary$sample_period.Holt),
           FUN = function(x) mean(x, na.rm = T))
 
 par(mfrow=c(1,1))
@@ -158,123 +158,101 @@ dfs.in <-
   window(dfs,
          end = c(2020, 12))
 
-dfs.out <- 
+dfs.out <-    # 12 obserwacji out-of sample (jeden cykl)
   window(dfs,
          start = c(2021, 01))
 
 # addytywny model Holta-Wintersa
-dfs.HWadd <- HoltWinters(dfs.in,
+dfs.in.HWadd <- HoltWinters(dfs.in,
                             seasonal = "additive") #szereg in-sample
-dfs.HWadd
-plot(dfs.HWadd)
+dfs.in.HWadd
+plot(dfs.in.HWadd)
 
-dfs.HWadd.forecast <- predict(dfs.HWadd,
-                                  n.ahead = 36,
+dfs.in.HWadd.forecast <- predict(dfs.in.HWadd,
+                                  n.ahead = 12,
                                   prediction.interval = TRUE) #fit = prognoza, dalej dolny i gorny przedzial ufnosci
 
 library(rcompanion)
 par(mfrow=c(1,2))
 
 plot(dfs) # porownanie prognozy z oryginalnym szeregiem 
-lines(dfs.HWadd.forecast[, 1], col = "blue") # prognoza
-lines(dfs.HWadd.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
-lines(dfs.HWadd.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
-abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+lines(dfs.in.HWadd.forecast[, 1], col = "blue") # prognoza
+lines(dfs.in.HWadd.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
+lines(dfs.in.HWadd.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
+abline(v = 2021, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
 title("Model addytywny")
 
-plot(window(dfs, start = c(2018, 12)))  # porownanie prognozy z oryginalnym szeregiem 
-lines(dfs.HWadd.forecast[, 1], col = "blue") # prognoza
-lines(dfs.HWadd.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
-lines(dfs.HWadd.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
-abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+plot(window(dfs, start = c(2019, 12)))  # porownanie prognozy z oryginalnym szeregiem 
+lines(dfs.in.HWadd.forecast[, 1], col = "blue") # prognoza
+lines(dfs.in.HWadd.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
+lines(dfs.in.HWadd.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
+abline(v = 2021, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
 title("Model addytywny")
 
 
 # multiplikatywny model Holta-Wintersa
-dfs.HWmult <- HoltWinters(dfs.in,
+dfs.in.HWmult <- HoltWinters(dfs.in,
                              seasonal="multiplicative")
-dfs.HWmult # info o modelu; beta bliska zero wiec nie ma duzego lokalnego trendu zmienijacego sie w czasie
+dfs.in.HWmult # info o modelu; beta bliska zero wiec nie ma duzego lokalnego trendu zmienijacego sie w czasie
 
-plot(dfs.HWmult)
+plot(dfs.in.HWmult)
 
-dfs.HWmult.forecast <- predict(dfs.HWmult,
-                              n.ahead = 36,
+dfs.in.HWmult.forecast <- predict(dfs.in.HWmult,
+                              n.ahead = 12,
                               prediction.interval = TRUE) #fit = prognoza, dalej dolny i gorny przedzial ufnosci
 
 plot(dfs) # porownanie prognozy z oryginalnym szeregiem 
-lines(dfs.HWmult.forecast[, 1], col = "blue") # prognoza
-lines(dfs.HWmult.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
-lines(dfs.HWmult.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
-abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+lines(dfs.in.HWmult.forecast[, 1], col = "blue") # prognoza
+lines(dfs.in.HWmult.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
+lines(dfs.in.HWmult.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
+abline(v = 2021, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
 title("Model multiplikatywny")
 
-plot(window(dfs, start = c(2018, 12)))  # porownanie prognozy z oryginalnym szeregiem 
-lines(dfs.HWmult.forecast[, 1], col = "blue") # prognoza
-lines(dfs.HWmult.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
-lines(dfs.HWmult.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
-abline(v = 2019, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
+plot(window(dfs, start = c(2019, 12)))  # porownanie prognozy z oryginalnym szeregiem 
+lines(dfs.in.HWmult.forecast[, 1], col = "blue") # prognoza
+lines(dfs.in.HWmult.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
+lines(dfs.in.HWmult.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
+abline(v = 2021, lty = 2) # dodajemy pionową linię referencyjną, gdzie zaczuna sie okres out-of-sample
 title("Model multiplikatywny")
 
-
-
-# oszacujmy prognozę na 36 obserwacji naprzód
-dfs.HWmult.forecast <- predict(dfs.HWmult,
-                                  n.ahead = 36,
-                                  prediction.interval = TRUE) #fit = prognoza, dalej dolny i gorny przedzial ufnosci
-
-# następnie porównajmy prognozę z oryginalnym szeregiem 
-plot(dfs.ts)
-lines(dfs.HWmult.forecast[, 1], col = "blue") # prognoza
-lines(dfs.HWmult.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności
-lines(dfs.HWmult.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności
-abline(v = 2004, lty = 2) # dodajemy pionową linię referencyjną, gdzie sie zaczyna out-of-sample
-
-# obejrzyjmy prognozę w zbliżeniu
-length(dfs.ts)
-
-# zmienimy w tym celu jedynie pierwszą linię (pierwsze polecenie)
-plot(window(dfs.ts, start = c(2001, 12)))
-lines(dfs.HWmult.forecast[, 1], col = "blue")  
-lines(dfs.HWmult.forecast[, 2], col = "red", lty = 2) 
-lines(dfs.HWmult.forecast[, 3], col = "red", lty = 2) 
-abline(v = 2004, lty = 2) 
 
 # porównanie - bledy prognozy ex-post
 
-dfs.HWadd$fitted[, 1]
-dfs.HWmult$fitted[, 1]
+dfs.in.HWadd$fitted[, 1]
+dfs.in.HWmult$fitted[, 1]
 
-dfs.HWadd.summary <- window(dfs.HWadd$fitted[, 1], end =c(2021, 12) , extend = TRUE)
-dfs.HWmult.summary <- window(dfs.HWmult$fitted[, 1], end =c(2021, 12) , extend = TRUE)
+dfs.in.HWadd.summary <- window(dfs.in.HWadd$fitted[, 1], end =c(2021, 12) , extend = TRUE)
+dfs.in.HWmult.summary <- window(dfs.in.HWmult$fitted[, 1], end =c(2021, 12) , extend = TRUE)
 
 # wstawiamy prognozy 
-window(dfs.HWadd.summary, start = c(2019, 1)) <- dfs.HWadd.forecast[, 1]
-window(dfs.HWmult.summary, start = c(2019, 1)) <- dfs.HWmult.forecast[, 1]
+window(dfs.in.HWadd.summary, start = c(2021, 1)) <- dfs.in.HWadd.forecast[, 1]
+window(dfs.in.HWmult.summary, start = c(2021, 1)) <- dfs.in.HWmult.forecast[, 1]
 
-dfs.HWadd.summary
-dfs.HWmult.summary
+dfs.in.HWadd.summary
+dfs.in.HWmult.summary
 
-HW.summary <- ts.union(dfs,dfs.HWadd.summary,dfs.HWmult.summary)
+HW.summary <- ts.union(dfs,dfs.in.HWadd.summary,dfs.in.HWmult.summary)
 
 library(xts)
 HW.summary = as.xts(HW.summary)
 
 sample_period <-
-  ts(ifelse(index(HW.summary) < "2019-01", 0, 1), 
+  ts(ifelse(index(HW.summary) < "2021-01", 0, 1), 
      start  =c(2004, 1), freq = 12)
 
+sample_period
 names(HW.summary)
 HW.summary$sample_period <- sample_period
 
-HW.summary$mae_HWadd <- abs(HW.summary$dfs.HWadd.summary-HW.summary$dfs)
-HW.summary$mse_HWadd   <- (HW.summary$dfs.HWadd.summary-HW.summary$dfs)^2
-HW.summary$mape_HWadd   <- abs((HW.summary$dfs.HWadd.summary-HW.summary$dfs)/HW.summary$dfs)
-HW.summary$amape_HWadd   <- abs((HW.summary$dfs.HWadd.summary-HW.summary$dfs)/(HW.summary$dfs.HWadd.summary+HW.summary$dfs))
+HW.summary$mae_HWadd <- abs(HW.summary$dfs.in.HWadd.summary-HW.summary$dfs)
+HW.summary$mse_HWadd   <- (HW.summary$dfs.in.HWadd.summary-HW.summary$dfs)^2
+HW.summary$mape_HWadd   <- abs((HW.summary$dfs.in.HWadd.summary-HW.summary$dfs)/HW.summary$dfs)
+HW.summary$amape_HWadd   <- abs((HW.summary$dfs.in.HWadd.summary-HW.summary$dfs)/(HW.summary$dfs.in.HWadd.summary+HW.summary$dfs))
 
-HW.summary$mae_HWmult    <- abs(HW.summary$dfs.HWmult.summary-HW.summary$dfs)
-HW.summary$mse_HWmult      <- (HW.summary$dfs.HWmult.summary-HW.summary$dfs)^2
-HW.summary$mape_HWmult     <- abs((HW.summary$dfs.HWmult.summary-HW.summary$dfs)/HW.summary$dfs)
-HW.summary$amape_HWmult    <- abs((HW.summary$dfs.HWmult.summary-HW.summary$dfs)/(HW.summary$dfs.HWmult.summary+HW.summary$dfs))
+HW.summary$mae_HWmult    <- abs(HW.summary$dfs.in.HWmult.summary-HW.summary$dfs)
+HW.summary$mse_HWmult      <- (HW.summary$dfs.in.HWmult.summary-HW.summary$dfs)^2
+HW.summary$mape_HWmult     <- abs((HW.summary$dfs.in.HWmult.summary-HW.summary$dfs)/HW.summary$dfs)
+HW.summary$amape_HWmult    <- abs((HW.summary$dfs.in.HWmult.summary-HW.summary$dfs)/(HW.summary$dfs.in.HWmult.summary+HW.summary$dfs))
 
 aggregate(HW.summary[, 4:12],
           by = list(HW.summary$sample_period),
