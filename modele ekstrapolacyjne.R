@@ -20,6 +20,9 @@ is.ts(df)
 df = ts(data=df$Value, frequency = 12,             
              start=c(1994,1), end=c(2021,12)) 
 
+ln.df = log(df)
+diff.ln.df <- diff.xts(ln.df)
+
 class(df) 
 
 # Wykres danych w czasie
@@ -30,9 +33,16 @@ df.in <-
   window(df,
          end = c(2021, 09))
 
+ln.df.in <- log(df.in)
+
+library(xts)
+diff.ln.df.in<-diff.xts(ln.df.in)
+
 df.out <- 
   window(df,
          start = c(2021, 10))
+
+ln.df.out <- log(df.out)
 
 ##### modele ekstrapolacyjne ###################################################
 # prosty model wygładzania wykładniczego (EWMA) - bez trendu i sezonowości
@@ -134,6 +144,112 @@ aggregate(Holt.summary[, 4:12],
 
 par(mfrow=c(1,1))
 
+
+##### modele ekstrapolacyjne ln.df ###################################################
+# prosty model wygładzania wykładniczego (EWMA) - bez trendu i sezonowości
+
+library(xts)
+ln.df <- log(df)
+ln.df.in <- log(df.in)
+
+
+ln.df.in.EWMA <- HoltWinters(ln.df.in,
+                       beta  = FALSE, # beta jest czynnikiem trendu
+                       gamma = FALSE) # gamma jest czynnikiem sezonowym
+
+plot(ln.df.in.EWMA)
+plot(ln.df.in.EWMA$fitted)
+
+ln.df.in.EWMA.forecast <- predict(ln.df.in.EWMA, # prognoza na 3 obserwacje do przodu
+                            n.ahead = 3,
+                            prediction.interval = TRUE)
+
+library(rcompanion)
+par(mfrow=c(1,2))
+
+plot(ln.df)
+lines(ln.df.in.EWMA.forecast[, 1], col = "blue") # prognozy 
+lines(ln.df.in.EWMA.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
+lines(ln.df.in.EWMA.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+title("EWMA")
+
+plot(window(ln.df, start = c(2019, 12)))
+lines(ln.df.in.EWMA.forecast[, 1], col = "blue") # prognozy 
+lines(ln.df.in.EWMA.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
+lines(ln.df.in.EWMA.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+title("EWMA")
+
+# model Holta
+ln.df.in.Holt <- HoltWinters(ln.df.in,
+                       gamma = FALSE) # gamma jest czynnikiem sezonowym
+
+plot(ln.df.in.Holt)
+plot(ln.df.in.Holt$fitted)
+
+ln.df.in.Holt.forecast <- predict(ln.df.in.Holt, # prognoza na 3 obserwacje do przodu
+                            n.ahead = 3,
+                            prediction.interval = TRUE)
+
+plot(ln.df)
+lines(ln.df.in.Holt.forecast[, 1], col = "blue") # prognozy 
+lines(ln.df.in.Holt.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
+lines(ln.df.in.Holt.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+title("Holt")
+
+plot(window(ln.df, start = c(2019, 12)))
+lines(ln.df.in.Holt.forecast[, 1], col = "blue") # prognozy 
+lines(ln.df.in.Holt.forecast[, 2], col = "red", lty = 2) # dolna granica przedziału ufności dla prognozy
+lines(ln.df.in.Holt.forecast[, 3], col = "red", lty = 2) # górna granica przedziału ufności dla prognozy
+abline(v = 2021+9/12, lty = 2)  # dodajemy pionową linię referencyjną (zeby zobaczyc okres out-of-sample)
+title("Holt")
+
+# porównanie - bledy prognozy ex-post
+
+ln.df.in.EWMA$fitted[, 1]
+ln.df.in.Holt$fitted[, 1]
+
+ln.df.in.EWMA.summary <- window(ln.df.in.EWMA$fitted[, 1], end =c(2021, 12) , extend = TRUE)
+ln.df.in.Holt.summary <- window(ln.df.in.Holt$fitted[, 1], end =c(2021, 12) , extend = TRUE)
+
+window(ln.df.in.EWMA.summary, start = c(2021, 1)) <- ln.df.in.EWMA.forecast[, 1]
+window(ln.df.in.Holt.summary, start = c(2021, 1)) <- ln.df.in.Holt.forecast[, 1]
+
+ln.df.in.EWMA.summary
+ln.df.in.Holt.summary
+
+ln.Holt.summary <- ts.union(ln.df,ln.df.in.EWMA.summary,ln.df.in.Holt.summary)
+
+library(xts)
+ln.Holt.summary = as.xts(ln.Holt.summary)
+
+sample_period.ln.Holt <-
+  ts(ifelse(index(ln.Holt.summary) < "2021-10", 0, 1), 
+     start  =c(1994, 1), freq = 12)
+
+sample_period.ln.Holt
+
+names(ln.Holt.summary)
+ ln.Holt.summary$sample_period.ln.Holt <- sample_period.ln.Holt
+
+ln.Holt.summary$mae_EWMA <- abs(ln.Holt.summary$ln.df.in.EWMA.summary-ln.Holt.summary$ln.df)
+ln.Holt.summary$mse_EWMA   <- (ln.Holt.summary$ln.df.in.EWMA.summary-ln.Holt.summary$ln.df)^2
+ln.Holt.summary$mape_EWMA   <- abs((ln.Holt.summary$ln.df.in.EWMA.summary-ln.Holt.summary$ln.df)/ln.Holt.summary$ln.df)
+ln.Holt.summary$amape_EWMA   <- abs((ln.Holt.summary$ln.df.in.EWMA.summary-ln.Holt.summary$ln.df)/(ln.Holt.summary$ln.df.in.EWMA.summary+ln.Holt.summary$ln.df))
+
+ln.Holt.summary$mae_Holt   <- abs(ln.Holt.summary$ln.df.in.Holt.summary-ln.Holt.summary$ln.df)
+ln.Holt.summary$mse_Holt      <- (ln.Holt.summary$ln.df.in.Holt.summary-ln.Holt.summary$ln.df)^2
+ln.Holt.summary$mape_Holt     <- abs((ln.Holt.summary$ln.df.in.Holt.summary-ln.Holt.summary$ln.df)/ln.Holt.summary$ln.df)
+ln.Holt.summary$amape_Holt    <- abs((ln.Holt.summary$ln.df.in.Holt.summary-ln.Holt.summary$ln.df)/(ln.Holt.summary$ln.df.in.Holt.summary+ln.Holt.summary$ln.df))
+
+aggregate(ln.Holt.summary[, 4:12],
+          by = list(ln.Holt.summary$sample_period.ln.Holt),
+          FUN = function(x) mean(x, na.rm = T))
+
+par(mfrow=c(1,1))
+
 ################################################################################
 ##################### dane sezonowe ############################################
 
@@ -145,6 +261,7 @@ is.ts(dfs)
 #obiekt time-series
 dfs = ts(data=dfs$Value, frequency = 12,             
         start=c(2004,1), end=c(2021,12)) 
+
 
 class(dfs) 
 
